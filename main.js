@@ -85,12 +85,12 @@ function semverCompare(v1, v2) {
 }
 
 // Input parameters. See action.yaml
-const { INPUT_PATH, INPUT_TOKEN, INPUT_FORMAT } = process.env;
+const { INPUT_PATH, INPUT_TOKEN, INPUT_FORMAT, INPUT_FILENAME, INPUT_VERSION_KEY } = process.env;
 
 const event = require(process.env.GITHUB_EVENT_PATH);
-const file = path.join(INPUT_PATH, "package.json");
+const file = path.join(INPUT_PATH, INPUT_FILENAME);
 
-// Fetch the base package.json file
+// Fetch the base INPUT_FILENAME file
 // https://developer.github.com/v3/repos/contents/#get-contents
 const res = cp.spawnSync("curl", [
   "--header",
@@ -108,15 +108,15 @@ if (res.status != 0) {
 const base = JSON.parse(res.stdout.toString());
 const head = require(path.resolve(process.cwd(), file));
 
-console.log(`${base.name} v${base.version} => ${head.name} v${head.version}`);
+console.log(`${base.name} v${base[INPUT_VERSION_KEY]} => ${head.name} v${head[INPUT_VERSION_KEY]}`);
 
 if (base.name == head.name) {
-  if (base.version === head.version) {
+  if (base[INPUT_VERSION_KEY] === head[INPUT_VERSION_KEY]) {
     console.log(`::error file=${file},line=3::Requires a new version number.`);
     process.exit(1);
   }
 
-  const versionDiffResult = semverCompare(base.version, head.version);
+  const versionDiffResult = semverCompare(base[INPUT_VERSION_KEY], head[INPUT_VERSION_KEY]);
 
   if (versionDiffResult === 1 || versionDiffResult === 0) {
     console.log(
@@ -131,11 +131,11 @@ if (base.name == head.name) {
 // Release name, e.g. "api_v1.0.0+build.345.zip"
 const release = INPUT_FORMAT.replace(/\{pkg\}/gi, head.name)
   .replace(/\{name\}/gi, head.name)
-  .replace(/\{version\}/gi, head.version)
+  .replace(/\{version\}/gi, head[INPUT_VERSION_KEY])
   .replace(/\{pr\}/gi, event.pull_request.number)
   .replace(/\{pr_number\}/gi, event.pull_request.number);
 
 // Set the action output values (name, version, release)
 console.log(`::set-output name=name::${head.name}`);
-console.log(`::set-output name=version::${head.version}`);
+console.log(`::set-output name=version::${head[INPUT_VERSION_KEY]}`);
 console.log(`::set-output name=release::${release}`);

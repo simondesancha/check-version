@@ -3,8 +3,13 @@ description: |
   Verifies that the version number (in a pull request) was bumped by comparing
   it to the prevous version from base branch.
 author: Kriasoft
-
 inputs:
+  filename:
+    description: "File to read the version string from. Defaults to 'package.json'"
+    default: "package.json"
+  version_key:
+    description: "Key to read the version string from inside $filename. Defaults to 'version'"
+    default: "version"
   path:
     description: "Relative path under $GITHUB_WORKSPACE containing package.json file."
     default: "."
