@@ -108,7 +108,7 @@ if (res.status != 0) {
 const base = JSON.parse(res.stdout.toString());
 const head = require(path.resolve(process.cwd(), file));
 
-console.log(`${base.name} v${base[INPUT_VERSION_KEY]} => ${head.name} v${head[INPUT_VERSION_KEY]}`);
+console.log(`v${base[INPUT_VERSION_KEY]} => v${head[INPUT_VERSION_KEY]}`);
 
 if (base.name == head.name) {
   if (base[INPUT_VERSION_KEY] === head[INPUT_VERSION_KEY]) {
